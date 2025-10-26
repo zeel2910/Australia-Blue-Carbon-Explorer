@@ -15,5 +15,9 @@ A national-scale interactive web GIS built on Google Earth Engine to visualise, 
 **Tech Stack:**  
 Google Earth Engine (JavaScript), MODIS NDVI (MOD13Q1), GAUL boundaries, open ecosystem shapefiles.
 
+## 🌐 Live App (Google Earth Engine)
+
+**Launch here:** [https://ee-zeelchavda911.projects.earthengine.app/view/australia-states-blue-carbon-explorer]  
+
 **Author:** Zeel Chavda  
 **License:** MIT  

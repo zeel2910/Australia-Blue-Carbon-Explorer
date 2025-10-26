@@ -1,9 +1,7 @@
-/*******************************
- * Australia Blue-Carbon Explorer (MVP)
- * Polished + faster stats (Mean NDVI removed from stats)
- *******************************/
 
-/* ========== CONFIG ========== */
+ * Australia Blue-Carbon Explorer
+
+/*  CONFIG  */
 var ASSETS = {
   mangroves:   'users/zeelchavda911/Mangroves',
   seagrasses:  'users/zeelchavda911/Seagrasses',
@@ -51,7 +49,7 @@ var NDVI_BASELINE = 2005;
 var NDVI_COMPARISON = 2024;
 var DELTA_THR = 0.05; // absolute |ΔNDVI| threshold
 
-/* ========== DATA ========== */
+/*  DATA  */
 var mangroves   = ee.FeatureCollection(ASSETS.mangroves);
 var seagrasses  = ee.FeatureCollection(ASSETS.seagrasses);
 var saltmarshes = ee.FeatureCollection(ASSETS.saltmarshes);
@@ -68,7 +66,7 @@ var sgMask = ee.Image().byte().paint({featureCollection: seagrasses,  color:1}).
 var smMask = ee.Image().byte().paint({featureCollection: saltmarshes, color:1}).selfMask();
 var bcAllMask = mMask.unmask().add(sgMask.unmask()).add(smMask.unmask()).gt(0).selfMask();
 
-/* ========== NDVI (with light client-side caching) ========== */
+/*  NDVI (with light client-side caching)  */
 var _ndviCache = {};
 function ndviImageForYear(y){
   var key = String(y);
@@ -101,7 +99,7 @@ function renderDeltaBC(t1, t2, thrAbs){
   lyrNDVI.setName('ΔNDVI in Blue-Carbon ('+t2+' − '+t1+')');
 }
 
-/* ========== PERFORMANCE BASE (fixed projection & reusable masks) ========== */
+/*  PERFORMANCE BASE  */
 var CRS_METERS = 'EPSG:3577';     // GDA94 / Australian Albers
 var SCALE_M = 250;                // Match MODIS 250 m
 
@@ -121,7 +119,7 @@ function deltaNdvi(y1, y2){
            .reproject({crs: CRS_METERS, scale: SCALE_M});
 }
 
-/* ========== FAST, SINGLE-PASS STATISTICS ========== */
+/*  FAST STATISTICS  */
 function areaHaBands() {
   return ee.Image.cat([
     haImgFix.updateMask(mMaskFix).rename('ha_m'),
@@ -180,7 +178,7 @@ function fastStatsDict(geom, baseline, comparison, thrAbs) {
   });
 }
 
-/* ========== GEOMETRY HELPERS & OUTLINES ========== */
+/*  GEOMETRY HELPERS & OUTLINES  */
 function toGaulName(name){ return GAUL_NAME_MAP[name] || name; }
 function geomForState(stateVal){
   return (stateVal === 'All States')
@@ -195,7 +193,7 @@ function outlineImage(fc, width){
 }
 var allStatesOutlineImg = outlineImage(ausStates, 1);
 
-/* ========== MAP SETUP ========== */
+/*  MAP SETUP  */
 var map = ui.Map();
 map.setOptions('HYBRID');
 map.setCenter(134.5, -25.0, 4);
@@ -231,7 +229,7 @@ function makeCard(title){
   return {card:card, body:body};
 }
 
-/* ========== TIME SERIES (Inspector) ========== */
+/*  TIME SERIES (Inspector)  */
 var yearsFull = ee.List.sequence(2001, 2024);
 function ndviCollectionAnnual(){
   return ee.ImageCollection.fromImages(
@@ -257,7 +255,7 @@ function ndviTimeSeriesAtPoint(pt){
     });
 }
 
-/* ========== SIDEBAR UI ========== */
+/*  SIDEBAR UI  */
 var sidebar = ui.Panel({layout: ui.Panel.Layout.flow('vertical'),
   style:{width:'360px', padding:'0', backgroundColor:'rgba(0,0,0,0)', margin:'0'}});
 
@@ -310,7 +308,7 @@ legend.add(ui.Label('■ Mangroves',  {color:'#1b9e77', margin:'2px 0'}));
 legend.add(ui.Label('■ Seagrasses', {color:'#377eb8', margin:'2px 0'}));
 legend.add(ui.Label('■ Saltmarshes',{color:'#e6ab02', margin:'2px 0'}));
 
-/* ======== Categorical NDVI legend (uses colored ■ so swatches always show) ======== */
+/*  Categorical NDVI legend  */
 var NDVI_CLASSES = {
   breaks: [0.00, 0.20, 0.45, 0.65, 0.90],
   colors: ['#d73027', '#fdae61', '#b8e186', '#1f78b4'],
@@ -333,7 +331,7 @@ function setNdviCategoricalLegend() {
   row(NDVI_CLASSES.colors[2], NDVI_CLASSES.labels[2]);
   row(NDVI_CLASSES.colors[3], NDVI_CLASSES.labels[3]);
 }
-/* ======== END categorical legend ======== */
+/*  categorical legend  */
 
 /* Layout */
 ui.root.clear();
@@ -344,7 +342,7 @@ map.add(quick);
 /* Show the categorical NDVI legend immediately */
 setNdviCategoricalLegend();
 
-/* ========== INTERACTION LOGIC ========== */
+/*  INTERACTION LOGIC  */
 var stateSelect, quickState, applyState;
 function refreshYear(y){
   renderNdviForYear(y);
@@ -352,7 +350,7 @@ function refreshYear(y){
 }
 refreshYear('2024');
 
-/* Field detection (robust) */
+/* Field detection */
 function detectField(fc, candidates, cb){
   fc.first().propertyNames().evaluate(function(names){
     names = names || [];
@@ -424,7 +422,7 @@ detectField(mangroves, STATE_CANDIDATES, function(msf){
                 map.setCenter(134.5, -25.0, 4);
               }
 
-              // ---- Stats (single evaluate) ----
+              //  Stats
               statsPanel.clear();
               statsPanel.add(ui.Label('Computing statistics…', {color:THEME.subText, margin:'0 0 6px 0'}));
 
@@ -523,9 +521,10 @@ detectField(mangroves, STATE_CANDIDATES, function(msf){
   });
 });
 
-/* ========== MAP CLICK (Inspector only: NDVI time series) ========== */
+/*  MAP CLICK (Inspector only: NDVI time series)  */
 map.onClick(function(coords){
   chartHolder.clear();
   var pt = ee.Geometry.Point([coords.lon, coords.lat]);
   chartHolder.add(ndviTimeSeriesAtPoint(pt));
 });
+
